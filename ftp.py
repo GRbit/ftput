@@ -1,7 +1,7 @@
 import ftput.conn as conn
 import ftput.error as error
 import re
-import socket.error
+import socket
 
 _re227_ = re.compile(r'\d+,\d+,\d+,\d+,\d+,\d+')
 CRLF = '\r\n'
@@ -61,6 +61,16 @@ class FTP:
             if '226' not in resp:
                 self.conn.get_resp()
             return ll
+        return False
+
+    def mkdir(self, path):
+        if '257' in self.conn.MKD(path):
+            return True
+        return False
+
+    def rmdir(self, path):
+        if '250' in self.conn.RMD(path):
+            return True
         return False
 
     def retrieve(self, remote_path, local_path):
