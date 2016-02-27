@@ -64,7 +64,7 @@ class FTPConn:
 
         self.connect()
         self.login()
-        # self.TYPE('I')
+        self.TYPE('I')
 
     def connect(self, host='', port='', timeout=''):
         if host:
