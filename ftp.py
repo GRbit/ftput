@@ -6,6 +6,17 @@ import socket
 _re227_ = re.compile(r'\d+,\d+,\d+,\d+,\d+,\d+')
 CRLF = '\r\n'
 
+def check_resp(resp, code):
+    """
+
+    :type resp: str or unicode
+    :type code: str or unicode
+    :rtype: bool
+    """
+    for line in resp.split(CRLF):
+        if code in line[:3]:
+            return True
+    return False
 
 class FTP:
     """Basic ftp class operating in 'control connection' by using ftp_conn class"""
@@ -19,16 +30,16 @@ class FTP:
     def isdir(self, pathname):
         pwd = self.pwd()
         resp = self.conn.CWD(pathname)
-        if '250' in resp:
+        if check_resp(resp, '250'):
             self.conn.CWD(pwd)
             return True
-        elif '550' in resp:
+        elif check_resp(resp, '550'):
             return False
         raise error.ImpossiburuAnswer("can't check is it directory or not: " + pathname)
 
     def pwd(self):
         resp = self.conn.PWD()
-        if '257' in resp:
+        if check_resp(resp, '257'):
             resp = resp.split('"', 1)[1]
             resp = resp.rsplit('"', 1)[0]
             return resp
@@ -39,16 +50,16 @@ class FTP:
             resp = self.conn.CWD(pathname)
         else:
             resp = self.conn.CDUP()
-        if '250' in resp:
+        if check_resp(resp, '250'):
             return resp
         return False
 
     def ls(self, pathname='.'):
         t_conn = self.make_psv()
         resp = str(self.conn.NLST(pathname))
-        if '150' in resp:
+        if check_resp(resp, '150'):
             ls = t_conn.read_all().split(CRLF)
-            if '226' not in resp:
+            if not check_resp(resp, '226'):
                 self.conn.get_resp()
             return filter(None, ls)
         return False
@@ -56,9 +67,9 @@ class FTP:
     def ll(self, pathname='.'):
         t_conn = self.make_psv()
         resp = str(self.conn.LIST(pathname))
-        if '150' in resp:
+        if check_resp(resp, '150'):
             ll = t_conn.read_all().split(CRLF)
-            if '226' not in resp:
+            if not check_resp(resp, '226'):
                 self.conn.get_resp()
             return filter(None, ll)
         return False
@@ -76,7 +87,7 @@ class FTP:
     def retrieve(self, remote_path, local_path):
         t_conn = self.make_psv()
         resp = self.conn.RETR(remote_path)
-        if '150' in resp:
+        if check_resp(resp, '150'):
             f = open(local_path, 'w')
             try:
                 f.write(t_conn.read_all())
@@ -84,12 +95,12 @@ class FTP:
                 return False
             f.close()
             # begin: for small files
-            if '226' not in resp:
+            if not check_resp(resp, '226'):
                 resp = self.conn.get_resp()
             # end: for small files
-            if '226' in resp:
+            if check_resp(resp, '226'):
                 return True
-        elif '550' in resp:
+        elif check_resp(resp, '550'):
             self.conn.ABOR()
             raise error.FileUnavailable(remote_path)
         return False
@@ -100,14 +111,14 @@ class FTP:
         f = open(local_path, 'r')
         w = f.read()
         f.close()
-        if '150' in resp:
+        if check_resp(resp, '150'):
             try:
                 t_conn.write(w)
                 t_conn.close()
             except socket.error:
                 return False
             resp = self.conn.get_resp()
-        if '226' not in resp:
+        if not check_resp(resp, '226'):
             return False
         return True
 
