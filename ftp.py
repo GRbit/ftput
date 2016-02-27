@@ -50,7 +50,7 @@ class FTP:
             ls = t_conn.read_all().split(CRLF)
             if '226' not in resp:
                 self.conn.get_resp()
-            return ls
+            return filter(None, ls)
         return False
 
     def ll(self, pathname='.'):
@@ -60,7 +60,7 @@ class FTP:
             ll = t_conn.read_all().split(CRLF)
             if '226' not in resp:
                 self.conn.get_resp()
-            return ll
+            return filter(None, ll)
         return False
 
     def mkdir(self, path):
@@ -104,9 +104,9 @@ class FTP:
             try:
                 t_conn.write(w)
                 t_conn.close()
-                resp = self.conn.get_resp()
             except socket.error:
                 return False
+            resp = self.conn.get_resp()
         if '226' not in resp:
             return False
         return True
