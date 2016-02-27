@@ -91,10 +91,6 @@ class FTPConn:
             raise error.AuthError("Unexpected server answer: " + resp)
         return resp
 
-    @staticmethod
-    def new_conn(ip, port):
-        return telnetlib.Telnet(ip, port)
-
     def get_resp(self, eager=False):
         """
         :type eager: bool

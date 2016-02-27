@@ -2,6 +2,7 @@ import ftput.conn as conn
 import ftput.error as error
 import re
 import socket
+import telnetlib
 
 _re227_ = re.compile(r'\d+,\d+,\d+,\d+,\d+,\d+')
 CRLF = '\r\n'
@@ -55,7 +56,7 @@ class FTP:
         return False
 
     def ls(self, pathname='.'):
-        t_conn = self.make_psv()
+        t_conn = self.make_psv(use_telnet=True)
         resp = str(self.conn.NLST(pathname))
         if check_resp(resp, '150'):
             ls = t_conn.read_all().split(CRLF)
@@ -65,7 +66,7 @@ class FTP:
         return False
 
     def ll(self, pathname='.'):
-        t_conn = self.make_psv()
+        t_conn = self.make_psv(use_telnet=True)
         resp = str(self.conn.LIST(pathname))
         if check_resp(resp, '150'):
             ll = t_conn.read_all().split(CRLF)
@@ -84,15 +85,20 @@ class FTP:
             return True
         return False
 
-    def retrieve(self, remote_path, local_path):
-        t_conn = self.make_psv()
+    def retrieve(self, remote_path, local_path, chunk_in_kb=16):
+        s_conn = self.make_psv()
         resp = self.conn.RETR(remote_path)
         if check_resp(resp, '150'):
             f = open(local_path, 'w')
-            try:
-                f.write(t_conn.read_all())
-            except socket.error:
-                return False
+            while True:
+                try:
+                    data = s_conn.recv(chunk_in_kb*1024)
+                except socket.error:
+                    return False
+                if not data:
+                    break
+                f.write(data)
+            s_conn.close()
             f.close()
             # begin: for small files
             if not check_resp(resp, '226'):
@@ -105,24 +111,26 @@ class FTP:
             raise error.FileUnavailable(remote_path)
         return False
 
-    def store(self, local_path, remote_path):
-        t_conn = self.make_psv()
+    def store(self, local_path, remote_path, chunk_in_kb=16):
+        s_conn = self.make_psv()
         resp = self.conn.STOR(remote_path)
-        f = open(local_path, 'r')
-        w = f.read()
-        f.close()
         if check_resp(resp, '150'):
-            try:
-                t_conn.write(w)
-                t_conn.close()
-            except socket.error:
-                return False
+            f = open(local_path, 'r')
+            while 1:
+                chunk = f.read(chunk_in_kb*1024)
+                if not chunk: break
+                try:
+                    s_conn.sendall(chunk)
+                except socket.error:
+                    return False
+            s_conn.close()
+            f.close()
             resp = self.conn.get_resp()
         if not check_resp(resp, '226'):
             return False
         return True
 
-    def make_psv(self):
+    def make_psv(self, use_telnet=False):
         resp = self.conn.PASV()
         m = _re227_.search(resp)
         if not m:
@@ -130,4 +138,6 @@ class FTP:
         s = m.group(0).split(',')
         ip = '.'.join(s[:4])
         port = int(s[-2])*256 + int(s[-1])
-        return self.conn.new_conn(ip, port)
+        if use_telnet:
+            return telnetlib.Telnet(ip, port)
+        return socket.create_connection((ip, port), 60)
