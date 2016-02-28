@@ -34,7 +34,7 @@ class FTP:
         :type pathname: str or unicode
         :rtype: bool
         """
-        if len(self.stat.pathname) >= 1:
+        if len(self.stat(pathname)) >= 1:
             return True
         return False
 
@@ -44,7 +44,8 @@ class FTP:
         :type pathname: str or unicode
         :rtype: bool
         """
-        if (len(self.stat.pathname) == 1) and (stat[1][0] == '-'):
+        stat = self.stat(pathname)
+        if (len(stat) == 1) and (stat[1][0] == '-'):
             return True
         return False
 
@@ -96,11 +97,11 @@ class FTP:
         :rtype: list of str or unicode
         """
         t_conn = self.make_psv(use_telnet=True)
-        resp = str(self.conn.NLST(pathname))
+        resp = self.conn.NLST(pathname)
         if check_resp(resp, '150'):
             ls = t_conn.read_all().split(CRLF)
-            if not check_resp(resp, '226'):
-                self.conn.get_resp()
+            while not check_resp(resp, '226'):
+                resp = self.conn.get_resp()
             return filter(None, ls)
         return False
 
@@ -111,11 +112,11 @@ class FTP:
         :rtype: list of str or unicode
         """
         t_conn = self.make_psv(use_telnet=True)
-        resp = str(self.conn.LIST(pathname))
+        resp = self.conn.LIST(pathname)
         if check_resp(resp, '150'):
             ll = t_conn.read_all().split(CRLF)
-            if not check_resp(resp, '226'):
-                self.conn.get_resp()
+            while not check_resp(resp, '226'):
+                resp = self.conn.get_resp()
             return filter(None, ll)
         return False
 
@@ -152,6 +153,16 @@ class FTP:
         :rtype: bool
         """
         if '250' in self.conn.RMD(path):
+            return True
+        return False
+
+    def rm(self, path):
+        """
+
+        :type path: str or unicode
+        :rtype: bool
+        """
+        if '250' in self.conn.DELE(path):
             return True
         return False
 
@@ -229,6 +240,11 @@ class FTP:
         s = m.group(0).split(',')
         ip = '.'.join(s[:4])
         port = int(s[-2])*256 + int(s[-1])
+        if self.conn.debug:
+            if use_telnet:
+                print('Open telnet connection on ip', ip, 'on port', port)
+            else:
+                print('Open socket on ip', ip, 'on port', port)
         if use_telnet:
             return telnetlib.Telnet(ip, port)
         return socket.create_connection((ip, port), 60)
