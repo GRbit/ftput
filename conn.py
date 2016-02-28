@@ -101,12 +101,13 @@ class FTPConn:
         else:
             resp = self.telnet_c.read_some()
             resp += self.telnet_c.read_very_eager()
-        if resp[-2:] == CRLF:
-            resp = resp[:-2]
-        elif resp[-1:] in CRLF:
-            resp = resp[:-1]
         if self.debug:
-            print('RCI ' + resp)
+            d = resp
+            if resp[-2:] == CRLF:
+                d = resp[:-2]
+            elif resp[-1:] in CRLF:
+                d = resp[:-1]
+            print('RCI ' + d)
         self.lastresp = resp
         if resp[:3] == '421':
             self.connected = False
