@@ -100,6 +100,7 @@ class FTP:
         resp = self.conn.NLST(pathname)
         if check_resp(resp, '150'):
             ls = t_conn.read_all().split(CRLF)
+            t_conn.close()
             while not check_resp(resp, '226'):
                 resp = self.conn.get_resp()
             return filter(None, ls)
@@ -115,6 +116,7 @@ class FTP:
         resp = self.conn.LIST(pathname)
         if check_resp(resp, '150'):
             ll = t_conn.read_all().split(CRLF)
+            t_conn.close()
             while not check_resp(resp, '226'):
                 resp = self.conn.get_resp()
             return filter(None, ll)
@@ -127,8 +129,8 @@ class FTP:
         :rtype: list of str or unicode
         """
         resp = str(self.conn.STAT(pathname))
-        if check_resp(resp, '213-'):
-            while not check_resp(resp, '213 End'):
+        if check_resp(resp, '213-') or check_resp(resp, '211-'):
+            while not check_resp(resp, '213 End') and not check_resp(resp, '211 End'):
                 resp += self.conn.get_resp()
             resp = filter(None, resp.split(CRLF))
             if len(resp) == 2:
@@ -208,7 +210,7 @@ class FTP:
         :type chunk_in_kb: int
         :rtype: int
         """
-        # TODO return retrieved bytes
+        # TODO return sended bytes
         s_conn = self.make_psv()
         resp = self.conn.STOR(remote_path)
         if check_resp(resp, '150'):
