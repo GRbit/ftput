@@ -15,7 +15,7 @@ def check_resp(resp, code):
     :rtype: bool
     """
     for line in resp.split(CRLF):
-        if code in line[:3]:
+        if code in line[:len(code)]:
             return True
     return False
 
@@ -28,7 +28,32 @@ class FTP:
         print("\n", user, passwd, "\n")
         self.conn = conn.FTPConn(host, port, user, passwd, timeout, debug)
 
+    def exist(self, pathname):
+        """
+
+        :type pathname: str or unicode
+        :rtype: bool
+        """
+        if len(self.stat.pathname) >= 1:
+            return True
+        return False
+
+    def isfile(self, pathname):
+        """
+
+        :type pathname: str or unicode
+        :rtype: bool
+        """
+        if (len(self.stat.pathname) == 1) and (stat[1][0] == '-'):
+            return True
+        return False
+
     def isdir(self, pathname):
+        """
+
+        :type pathname: str or unicode
+        :rtype: bool
+        """
         pwd = self.pwd()
         resp = self.conn.CWD(pathname)
         if check_resp(resp, '250'):
@@ -39,14 +64,23 @@ class FTP:
         raise error.ImpossiburuAnswer("can't check is it directory or not: " + pathname)
 
     def pwd(self):
+        """
+
+        :rtype: str or unicode
+        """
         resp = self.conn.PWD()
         if check_resp(resp, '257'):
             resp = resp.split('"', 1)[1]
             resp = resp.rsplit('"', 1)[0]
             return resp
-        return False
+        return ''
 
     def cd(self, pathname=''):
+        """
+
+        :type pathname: str or unicode
+        :rtype: bool
+        """
         if pathname:
             resp = self.conn.CWD(pathname)
         else:
@@ -56,6 +90,11 @@ class FTP:
         return False
 
     def ls(self, pathname='.'):
+        """
+
+        :type pathname: str or unicode
+        :rtype: list of str or unicode
+        """
         t_conn = self.make_psv(use_telnet=True)
         resp = str(self.conn.NLST(pathname))
         if check_resp(resp, '150'):
@@ -66,6 +105,11 @@ class FTP:
         return False
 
     def ll(self, pathname='.'):
+        """
+
+        :type pathname: str or unicode
+        :rtype: list of str or unicode
+        """
         t_conn = self.make_psv(use_telnet=True)
         resp = str(self.conn.LIST(pathname))
         if check_resp(resp, '150'):
@@ -75,17 +119,51 @@ class FTP:
             return filter(None, ll)
         return False
 
+    def stat(self, pathname=''):
+        """
+
+        :type pathname: str or unicode
+        :rtype: list of str or unicode
+        """
+        resp = str(self.conn.STAT(pathname))
+        if check_resp(resp, '213-'):
+            while not check_resp(resp, '213 End'):
+                resp += self.conn.get_resp()
+            resp = filter(None, resp.split(CRLF))
+            if len(resp) == 2:
+                return list()
+            return resp[1:-1]
+        return False
+
     def mkdir(self, path):
+        """
+
+        :type path: str or unicode
+        :rtype: bool
+        """
         if '257' in self.conn.MKD(path):
             return True
         return False
 
     def rmdir(self, path):
+        """
+
+        :type path: str or unicode
+        :rtype: bool
+        """
         if '250' in self.conn.RMD(path):
             return True
         return False
 
     def retrieve(self, remote_path, local_path, chunk_in_kb=16):
+        """
+
+        :type remote_path: str or unicode
+        :type local_path: str or unicode
+        :type chunk_in_kb: int
+        :rtype: int
+        """
+        # TODO return retrieved bytes
         s_conn = self.make_psv()
         resp = self.conn.RETR(remote_path)
         if check_resp(resp, '150'):
@@ -112,6 +190,14 @@ class FTP:
         return False
 
     def store(self, local_path, remote_path, chunk_in_kb=16):
+        """
+
+        :type local_path: str or unicode
+        :type remote_path: str or unicode
+        :type chunk_in_kb: int
+        :rtype: int
+        """
+        # TODO return retrieved bytes
         s_conn = self.make_psv()
         resp = self.conn.STOR(remote_path)
         if check_resp(resp, '150'):
@@ -131,6 +217,11 @@ class FTP:
         return True
 
     def make_psv(self, use_telnet=False):
+        """
+
+        :type use_telnet: bool
+        :rtype: socket._socketobject or telnetlib.Telnet
+        """
         resp = self.conn.PASV()
         m = _re227_.search(resp)
         if not m:
