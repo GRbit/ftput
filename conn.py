@@ -1,3 +1,4 @@
+import sys
 import telnetlib
 import ftput.error as error
 
@@ -85,10 +86,10 @@ class FTPConn:
             resp = self.PASS(self.passwd)
         else:
             raise error.ImpossiburuAnswer
-        if resp[:1] == '5':
+        if resp[:1] == b'5':
             if resp[:3] == '530':
-                raise error.AuthError("Incorrect login")
-            raise error.AuthError("Unexpected server answer: " + resp)
+                raise error.AuthError(b"Incorrect login")
+            raise error.AuthError(b"Unexpected server answer: " + resp)
         return resp
 
     def get_resp(self, eager=False):
@@ -101,6 +102,8 @@ class FTPConn:
         else:
             resp = self.telnet_c.read_some()
             resp += self.telnet_c.read_very_eager()
+        if sys.version[0] == '3':
+            resp = resp.decode('utf-8')
         if self.debug:
             d = resp
             if resp[-2:] == CRLF:
@@ -120,8 +123,10 @@ class FTPConn:
         if self.debug:
             print('SND ' + cmd)
         self.lastcmd = cmd
-        cmd += CRLF
-        self.telnet_c.write(cmd)
+        if sys.version[0] == '2':
+            self.telnet_c.write(cmd + CRLF)
+        else:
+            self.telnet_c.write((cmd + CRLF).encode('utf-8'))
 
     def USER(self, username):
         """

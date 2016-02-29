@@ -1,11 +1,14 @@
-import ftput.conn as conn
-import ftput.error as error
-import re
+import sys
 import socket
 import telnetlib
+import re
+
+import ftput.conn as conn
+import ftput.error as error
 
 _re227_ = re.compile(r'\d+,\d+,\d+,\d+,\d+,\d+')
 CRLF = '\r\n'
+
 
 def check_resp(resp, code):
     """
@@ -18,6 +21,7 @@ def check_resp(resp, code):
         if code in line[:len(code)]:
             return True
     return False
+
 
 class FTP:
     """Basic ftp class operating in 'control connection' by using ftp_conn class"""
@@ -99,11 +103,14 @@ class FTP:
         t_conn = self.make_psv(use_telnet=True)
         resp = self.conn.NLST(pathname)
         if check_resp(resp, '150'):
-            ls = t_conn.read_all().split(CRLF)
+            ls = t_conn.read_all()
+            if sys.version[0] == '3':
+                ls = ls.decode('utf-8')
+            ls = ls.split(CRLF)
             t_conn.close()
             while not check_resp(resp, '226'):
                 resp = self.conn.get_resp()
-            return filter(None, ls)
+            return list(filter(None, ls))
         return False
 
     def ll(self, pathname='.'):
@@ -115,11 +122,14 @@ class FTP:
         t_conn = self.make_psv(use_telnet=True)
         resp = self.conn.LIST(pathname)
         if check_resp(resp, '150'):
-            ll = t_conn.read_all().split(CRLF)
+            ll = t_conn.read_all()
+            if sys.version[0] == '3':
+                ll = ll.decode('utf-8')
+            ll = ll.split(CRLF)
             t_conn.close()
             while not check_resp(resp, '226'):
                 resp = self.conn.get_resp()
-            return filter(None, ll)
+            return list(filter(None, ll))
         return False
 
     def stat(self, pathname=''):
@@ -132,7 +142,7 @@ class FTP:
         if check_resp(resp, '213-') or check_resp(resp, '211-'):
             while not check_resp(resp, '213 End') and not check_resp(resp, '211 End'):
                 resp += self.conn.get_resp()
-            resp = filter(None, resp.split(CRLF))
+            resp = list(filter(None, resp.split(CRLF)))
             if len(resp) == 2:
                 return list()
             return resp[1:-1]
@@ -217,7 +227,8 @@ class FTP:
             f = open(local_path, 'r')
             while 1:
                 chunk = f.read(chunk_in_kb*1024)
-                if not chunk: break
+                if not chunk:
+                    break
                 try:
                     s_conn.sendall(chunk)
                 except socket.error:
