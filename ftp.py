@@ -190,7 +190,7 @@ class FTP:
         s_conn = self.make_psv()
         resp = self.conn.RETR(remote_path)
         if check_resp(resp, '150'):
-            f = open(local_path, 'w')
+            f = open(local_path, 'wb')
             while True:
                 try:
                     data = s_conn.recv(chunk_in_kb*1024)
@@ -224,7 +224,7 @@ class FTP:
         s_conn = self.make_psv()
         resp = self.conn.STOR(remote_path)
         if check_resp(resp, '150'):
-            f = open(local_path, 'r')
+            f = open(local_path, 'rb')
             while 1:
                 chunk = f.read(chunk_in_kb*1024)
                 if not chunk:
