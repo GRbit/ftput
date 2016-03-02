@@ -104,7 +104,7 @@ class FTPConn:
             resp += self.telnet_c.read_very_eager()
         if sys.version[0] == '3':
             resp = resp.decode('utf-8')
-        if self.debug:
+        if self.debug > 1:
             d = resp
             if resp[-2:] == CRLF:
                 d = resp[:-2]
@@ -120,7 +120,7 @@ class FTPConn:
         if not self.connected:
             self.connect()
             self.login()
-        if self.debug:
+        if self.debug > 1:
             print('SND ' + cmd)
         self.lastcmd = cmd
         if sys.version[0] == '2':

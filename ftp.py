@@ -253,7 +253,7 @@ class FTP:
         s = m.group(0).split(',')
         ip = '.'.join(s[:4])
         port = int(s[-2])*256 + int(s[-1])
-        if self.conn.debug:
+        if self.conn.debug > 1:
             if use_telnet:
                 print('Open telnet connection on ip', ip, 'on port', port)
             else:
