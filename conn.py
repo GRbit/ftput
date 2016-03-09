@@ -134,7 +134,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('USER ' + username)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on USER command, trying again\n')
+            self.connected = False
+            resp = self.USER(username)
         if resp[:3] not in USER_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -145,7 +150,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('PASS ' + password)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on PASS command, trying again\n')
+            self.connected = False
+            resp = self.PASS(password)
         if resp[:3] not in PASS_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -156,7 +166,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('ACCT ' + account_information)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on ACCT command, trying again\n')
+            self.connected = False
+            resp = self.ACCT(account_information)
         if resp[:3] not in ACCT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -167,17 +182,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('CWD ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on CWD command, trying again\n')
+            self.connected = False
+            resp = self.CWD(pathname)
         if resp[:3] not in CWD_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def CDUP(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('CDUP')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on CDUP command, trying again\n')
+            self.connected = False
+            resp = self.CDUP()
         if resp[:3] not in CDUP_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -188,27 +214,44 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('SMNT ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on SMNT command, trying again\n')
+            self.connected = False
+            resp = self.SMNT(pathname)
         if resp[:3] not in SMNT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def QUIT(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('QUIT')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on QUIT command, trying again\n')
+            self.connected = False
+            resp = self.QUIT()
         if resp[:3] not in QUIT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def REIN(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('REIN')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on REIN command, trying again\n')
+            self.connected = False
+            resp = self.REIN()
         if resp[:3] not in REIN_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -219,17 +262,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('PORT ' + host_port)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on PORT command, trying again\n')
+            self.connected = False
+            resp = self.PORT(host_port)
         if resp[:3] not in PORT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def PASV(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('PASV')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on PASV command, trying again\n')
+            self.connected = False
+            resp = self.PASV()
         if resp[:3] not in PASV_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -240,7 +294,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('TYPE ' + type_code)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on TYPE command, trying again\n')
+            self.connected = False
+            resp = self.TYPE(type_code)
         if resp[:3] not in TYPE_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -251,7 +310,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('STRU ' + structure_code)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on STRU command, trying again\n')
+            self.connected = False
+            resp = self.STRU(structure_code)
         if resp[:3] not in STRU_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -262,7 +326,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('MODE ' + mode_code)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on MODE command, trying again\n')
+            self.connected = False
+            resp = self.MODE(mode_code)
         if resp[:3] not in MODE_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -273,7 +342,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('RETR ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on RETR command, trying again\n')
+            self.connected = False
+            resp = self.RETR(pathname)
         if resp[:3] not in RETR_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -284,17 +358,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('STOR ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on STOR command, trying again\n')
+            self.connected = False
+            resp = self.STOR(pathname)
         if resp[:3] not in STOR_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def STOU(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('STOU')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on STOU command, trying again\n')
+            self.connected = False
+            resp = self.STOU()
         if resp[:3] not in STOU_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -305,19 +390,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('APPE ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on APPE command, trying again\n')
+            self.connected = False
+            resp = self.APPE(pathname)
         if resp[:3] not in APPE_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def ALLO(self, decimal1, decimal2):
         """
-        :type decimal1: str
-        :type decimal2: str
+        :type decimal1, decimal2: str
         :rtype: str
         """
         self.send_cmd('ALLO ' + decimal1 + ' ' + decimal2)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on ALLO command, trying again\n')
+            self.connected = False
+            resp = self.ALLO(decimal1, decimal2)
         if resp[:3] not in ALLO_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -328,7 +422,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('REST ' + marker)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on REST command, trying again\n')
+            self.connected = False
+            resp = self.REST(marker)
         if resp[:3] not in REST_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -339,7 +438,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('RNFR ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on RNFR command, trying again\n')
+            self.connected = False
+            resp = self.RNFR(pathname)
         if resp[:3] not in RNFR_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -350,17 +454,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('RNTO ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on RNTO command, trying again\n')
+            self.connected = False
+            resp = self.RNTO(pathname)
         if resp[:3] not in RNTO_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def ABOR(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('ABOR')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on ABOR command, trying again\n')
+            self.connected = False
+            resp = self.ABOR()
         if resp[:3] not in ABOR_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -371,7 +486,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('DELE ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on DELE command, trying again\n')
+            self.connected = False
+            resp = self.DELE(pathname)
         if resp[:3] not in DELE_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -382,7 +502,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('RMD ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on RMD command, trying again\n')
+            self.connected = False
+            resp = self.RMD(pathname)
         if resp[:3] not in RMD_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -393,18 +518,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('MKD ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on MKD command, trying again\n')
+            self.connected = False
+            resp = self.MKD(pathname)
         if resp[:3] not in MKD_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def PWD(self):
         """
-
+        
         :rtype: str
         """
         self.send_cmd('PWD')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on PWD command, trying again\n')
+            self.connected = False
+            resp = self.PWD()
         if resp[:3] not in PWD_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -415,7 +550,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('LIST ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on LIST command, trying again\n')
+            self.connected = False
+            resp = self.LIST(pathname)
         if resp[:3] not in LIST_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -426,7 +566,12 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('NLST ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on NLST command, trying again\n')
+            self.connected = False
+            resp = self.NLST(pathname)
         if resp[:3] not in NLST_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -437,17 +582,28 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('SITE ' + string)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on SITE command, trying again\n')
+            self.connected = False
+            resp = self.SITE(string)
         if resp[:3] not in SITE_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def SYST(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('SYST')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on SYST command, trying again\n')
+            self.connected = False
+            resp = self.SYST()
         if resp[:3] not in SYST_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
@@ -458,38 +614,60 @@ class FTPConn:
         :rtype: str
         """
         self.send_cmd('STAT ' + pathname)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on STAT command, trying again\n')
+            self.connected = False
+            resp = self.STAT(pathname)
         if resp[:3] not in STAT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
-    def HELP(self, string=''):
+    def HELP(self, string):
         """
         :type string: str
         :rtype: str
         """
         self.send_cmd('HELP ' + string)
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on HELP command, trying again\n')
+            self.connected = False
+            resp = self.HELP(string)
         if resp[:3] not in HELP_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def NOOP(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('NOOP')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on NOOP command, trying again\n')
+            self.connected = False
+            resp = self.NOOP()
         if resp[:3] not in NOOP_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
 
     def FEAT(self):
         """
+        
         :rtype: str
         """
         self.send_cmd('FEAT')
-        resp = self.get_resp()
+        try:
+            resp = self.get_resp()
+        except EOFError:
+            sys.stderr.write('ERROR: Disconnected on FEAT command, trying again\n')
+            self.connected = False
+            resp = self.FEAT()
         if resp[:3] not in FEAT_acceptable:
             raise error.ImpossiburuAnswer(resp)
         return resp
