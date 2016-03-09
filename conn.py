@@ -86,10 +86,10 @@ class FTPConn:
             resp = self.PASS(self.passwd)
         else:
             raise error.ImpossiburuAnswer
-        if resp[:1] == b'5':
+        if resp[:1] == '5':
             if resp[:3] == '530':
-                raise error.AuthError(b"Incorrect login")
-            raise error.AuthError(b"Unexpected server answer: " + resp)
+                raise error.AuthError("Incorrect login")
+            raise error.AuthError("Unexpected server answer: " + resp)
         return resp
 
     def get_resp(self, eager=False):
