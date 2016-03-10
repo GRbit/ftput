@@ -38,7 +38,7 @@ class FTP:
         :type pathname: str or unicode
         :rtype: bool
         """
-        if len(self.stat(pathname)) >= 1:
+        if self.stat(pathname):
             return True
         return False
 
@@ -49,7 +49,7 @@ class FTP:
         :rtype: bool
         """
         stat = self.stat(pathname)
-        if (len(stat) == 1) and (stat[1][0] == '-'):
+        if stat and (len(stat) == 1) and (stat[1][0] == '-'):
             return True
         return False
 
@@ -260,4 +260,9 @@ class FTP:
                 print('Open socket on ip', ip, 'on port', port)
         if use_telnet:
             return telnetlib.Telnet(ip, port)
-        return socket.create_connection((ip, port), 60)
+        try:
+            return socket.create_connection((ip, port), 60)
+        except socket.timeout:
+            sys.stderr.write('ERROR: Disconnected on socket.create_connection, trying again\n')
+            self.conn.connected = False
+            return self.make_psv()
