@@ -32,3 +32,7 @@ STAT [<SP> <pathname>] <CRLF>
 HELP [<SP> <string>] <CRLF>
 NOOP <CRLF>
 FEAT <CRLF>
+MDTM <SP> <pathname> <CRLF>
+SIZE <SP> <pathname> <CRLF>
+MLST <SP> <pathname> <CRLF>
+MLSD <SP> <pathname> <CRLF>

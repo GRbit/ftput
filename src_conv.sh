@@ -1,4 +1,4 @@
-
+# script to make code for ftp standart functions
 
 cat commands.src | sed "s#^\([A-Z]\+\)#def \1(#" | \
 sed "s#def \([A-Z]\+\)( \+<SP> <\([a-z-]\+\)>#def \1(\2#" | \
@@ -7,12 +7,17 @@ sed "s# *<CRLF>#):#" | \
 sed "s#decimal-integer \[<SP> R <SP> <decimal-integer>\]#decimal1, decimal2#" | \
 sed "s#def \([A-Z]\+\)(\([^)]*\)):#\
 \ndef \1(self, \2):\n\
-    "'"""'"\n\
+    \"\"\"\n\
     :type \2: str\n\
     :rtype: str\n\
     \"\"\"\n\
     self.send_cmd('\1 ' + \2)\n\
-    resp = self.getresp()\n\
+    try:\n\
+        resp = self.get_resp()\n\
+    except EOFError:\n\
+        sys.stderr.write('ERROR: Disconnected on \1 command, trying again')\n\
+        self.connected = False\n\
+        resp = self.\1(\2)\n\
     if resp[:3] not in \1_acceptable:\n\
         raise error.ImpossiburuAnswer(resp)\n\
     return resp#" | \
