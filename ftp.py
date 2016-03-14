@@ -29,7 +29,6 @@ class FTP:
     def __init__(self, host, user='anonymous', passwd='', port=21, timeout=60,
                  debug=0):
         self.connected = False
-        print("\n", user, passwd, "\n")
         self.conn = conn.FTPConn(host, port, user, passwd, timeout, debug)
 
     def exist(self, pathname):
